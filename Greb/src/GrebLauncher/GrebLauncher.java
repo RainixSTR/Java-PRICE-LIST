@@ -62,7 +62,6 @@ public class GrebLauncher {
             System.err.println("File error");
             e.printStackTrace();
         }
-
     }
 
 }

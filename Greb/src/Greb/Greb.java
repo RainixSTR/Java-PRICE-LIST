@@ -32,5 +32,4 @@ public class Greb {
         }
         System.out.println(text);
     }
-
 }
