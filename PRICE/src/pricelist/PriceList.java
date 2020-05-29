@@ -5,16 +5,57 @@ import java.util.Map;
 import java.util.Objects;
 
 public class PriceList {
-
-    public static class Product {
-        private String name;
+    public static class Price {
         private int ruble;
         private int penny;
 
-        public Product(String name, int ruble, int penny) {
-            this.name = name;
+        public Price(int ruble, int penny) {
             this.ruble = ruble;
             this.penny = penny;
+        }
+
+        public int getRuble() {
+            return ruble;
+        }
+
+        public int getPenny() {
+            return penny;
+        }
+
+        public void setRuble(int newRuble) {
+            ruble = newRuble;
+        }
+
+        public void setPenny(int newPenny) {
+            penny = newPenny;
+        }
+
+        @Override
+        public String toString() {
+
+            return super.toString();
+        }
+    }
+
+    public static class Product {
+        private String name;
+        private Price price;
+
+        public Product(String name, Price price) {
+            this.name = name;
+            this.price = price;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Price getPrice() {
+            return price;
+        }
+
+        public void setName(String newName) {
+            name = newName;
         }
 
         @Override
@@ -22,14 +63,14 @@ public class PriceList {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Product product = (Product) o;
-            return ruble == product.ruble &&
-                    penny == product.penny &&
+            return price.ruble == product.price.ruble &&
+                    price.penny == product.price.penny &&
                     name.equals(product.name);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, ruble, penny);
+            return Objects.hash(name, price);
         }
 
         @Override
@@ -38,9 +79,9 @@ public class PriceList {
             sb.append("Name: ");
             sb.append(name);
             sb.append(", Price: ");
-            sb.append(ruble);
+            sb.append(price.ruble);
             sb.append(" rub., ");
-            sb.append(penny);
+            sb.append(price.penny);
             sb.append(" pen.");
             return sb.toString();
         }
@@ -55,41 +96,59 @@ public class PriceList {
     public PriceList() {
     }
 
+    private boolean checkId(Integer id) {
+        return productList.keySet().contains(id);
+    }
+
     public void addProduct(Integer id, Product newProduct) {
         if (!checkId(id)) productList.put(id, newProduct);
         else throw new IllegalArgumentException();
     }
 
-    public void addProduct(Integer id, String name, int ruble, int penny) {
-        addProduct(id, new Product(name, ruble, penny));
+    public void addProduct(Integer id, String name, Price price) {
+        if (price.ruble > -1 && price.penny > -1 && price.penny < 100)
+            addProduct(id, new Product(name, price));
+        else throw new IllegalArgumentException();
     }
 
     public void setName(Integer id, String newName) {
-        productList.get(id).name = newName;
+        if (checkId(id)) productList.get(id).name = newName;
+        else throw new IllegalArgumentException();
     }
 
-    public void setPrice(Integer id, int newRuble, int newPenny) {
-        productList.get(id).ruble = newRuble;
-        productList.get(id).penny = newPenny;
+    public void setPrice(Integer id, Price newPrice) {
+        if (checkId(id)) productList.get(id).price = newPrice;
+        else throw new IllegalArgumentException();
     }
 
-    public void removeProduct(Integer id) {
-        productList.remove(id);
-    }
-
-    public String getPrice(Integer id, int count) {
-        int pennySum = productList.get(id).penny * count;
-        int rubleSum = productList.get(id).ruble * count;
-        while (pennySum > 99) {
-            rubleSum += 1;
-            pennySum -= 100;
+    public double getPrice(Integer id, int cont) {
+        if (checkId(id)) {
+            int findRuble = productList.get(id).getPrice().ruble * cont;
+            int findPenny = productList.get(id).getPrice().penny * cont;
+            if (findPenny > 100) {
+                findRuble = findPenny / 100;
+                findPenny = findPenny % 100;
+            }
+            double findSum = findRuble + findPenny * 0.01;
+            return findSum;
         }
-
-        return (rubleSum + "." + pennySum);
+        else throw new IllegalArgumentException();
     }
 
-    public String getPrice(Integer id) {
+    public double getPrice(Integer id) {
         return getPrice(id, 1);
+    }
+
+    public String getName(Integer id) {
+        if (checkId(id)) return productList.get(id).name;
+        else throw new IllegalArgumentException();
+    }
+
+    public Product removeProduct(Integer id) {
+        if (checkId(id)) {
+            Product deletedProduct = productList.remove(id);
+            return deletedProduct;
+        } else throw new IllegalArgumentException();
     }
 
     public int getId(String name) {
@@ -98,10 +157,6 @@ public class PriceList {
                 return entry.getKey();
         }
         return -1;
-    }
-
-    private boolean checkId(Integer id) {
-        return productList.keySet().contains(id);
     }
 
     @Override
@@ -123,7 +178,7 @@ public class PriceList {
         sb.append("Price List (SIZE = ");
         sb.append(productList.size());
         sb.append(") {\n");
-        for (Map.Entry<Integer, Product> entry: productList.entrySet()) {
+        for (Map.Entry<Integer, Product> entry : productList.entrySet()) {
             sb.append("{ID: ");
             sb.append(entry.getKey());
             sb.append(", ");
