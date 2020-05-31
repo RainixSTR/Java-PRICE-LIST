@@ -1,8 +1,6 @@
 package pricelist;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class PriceList {
     public static class Price {
@@ -20,8 +18,7 @@ public class PriceList {
             if (penny > -1) {
                 this.ruble = penny / 100;
                 this.penny = penny % 100;
-            }
-            else throw new IllegalArgumentException();
+            } else throw new IllegalArgumentException();
         }
 
         public int getPriceInPenny() {
@@ -113,19 +110,28 @@ public class PriceList {
         productList.putAll(list);
     }
 
+    private List<Integer> idList = new ArrayList<>();
+
+    private boolean checkIdInList(Integer id) {
+        return idList.contains(id);
+    }
+
     public PriceList() {
     }
 
-    public boolean addProduct(Integer id, Product newProduct) {
-        return productList.putIfAbsent(id, newProduct) == null;
+    public void addProduct(Integer id, Product newProduct) {
+        if (!checkIdInList(id)) {
+            productList.put(id, newProduct);
+            idList.add(id);
+        } else throw new IllegalArgumentException();
     }
 
-    public boolean addProduct(Integer id, String name, Price price) {
-        return addProduct(id, new Product(name, price));
+    public void addProduct(Integer id, String name, Price price) {
+        addProduct(id, new Product(name, price));
     }
 
     public boolean setName(Integer id, String newName) {
-        if (productList.get(id) != null)  {
+        if (checkIdInList(id)) {
             productList.get(id).name = newName;
             return true;
         }
@@ -133,7 +139,7 @@ public class PriceList {
     }
 
     public boolean setPrice(Integer id, Price newPrice) {
-        if (productList.get(id) != null)  {
+        if (checkIdInList(id)) {
             productList.get(id).price = newPrice;
             return true;
         }
@@ -141,14 +147,9 @@ public class PriceList {
     }
 
     public Price getPrice(Integer id, int cont) {
-        if (productList.get(id) != null) {
-            int findRuble = productList.get(id).getPrice().ruble * cont;
-            int findPenny = productList.get(id).getPrice().penny * cont;
-            if (findPenny > 99) {
-                findRuble += findPenny / 100;
-                findPenny = findPenny % 100;
-            }
-            Price sumPrice = new Price(findRuble, findPenny);
+        if (checkIdInList(id)) {
+            int sumPenny = productList.get(id).getPrice().getPriceInPenny() * cont;
+            Price sumPrice = new Price(sumPenny);
             return sumPrice;
         } else throw new IllegalArgumentException();
     }
@@ -158,14 +159,14 @@ public class PriceList {
     }
 
     public String getName(Integer id) {
-        if (productList.get(id) != null) return productList.get(id).name;
+        if (checkIdInList(id)) return productList.get(id).name;
         else throw new IllegalArgumentException();
     }
 
-    public Product removeProduct(Integer id) {
-        if (productList.get(id) != null) {
-            Product deletedProduct = productList.remove(id);
-            return deletedProduct;
+    public void removeProduct(Integer id) {
+        if (checkIdInList(id)) {
+            productList.remove(id);
+            idList.remove(id);
         } else throw new IllegalArgumentException();
     }
 
