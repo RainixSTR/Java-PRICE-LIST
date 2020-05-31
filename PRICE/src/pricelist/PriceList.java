@@ -76,6 +76,10 @@ public class PriceList {
             name = newName;
         }
 
+        public void setPrice(Price newPrice) {
+            price = newPrice;
+        }
+
         @Override
         public int hashCode() {
             return Objects.hash(name, price);
@@ -110,45 +114,34 @@ public class PriceList {
         productList.putAll(list);
     }
 
-    private List<Integer> idList = new ArrayList<>();
-
-    private boolean checkIdInList(Integer id) {
-        return idList.contains(id);
-    }
-
     public PriceList() {
     }
 
     public void addProduct(Integer id, Product newProduct) {
-        if (!checkIdInList(id)) {
-            productList.put(id, newProduct);
-            idList.add(id);
-        } else throw new IllegalArgumentException();
+        if (productList.putIfAbsent(id, newProduct) == null) ;
+        else throw new IllegalArgumentException();
     }
 
     public void addProduct(Integer id, String name, Price price) {
         addProduct(id, new Product(name, price));
     }
 
-    public boolean setName(Integer id, String newName) {
-        if (checkIdInList(id)) {
-            productList.get(id).name = newName;
-            return true;
-        }
-        return false;
+    public void setName(Integer id, String newName) {
+        Product product = productList.get(id);
+        if (product == null) throw new IllegalArgumentException();
+        else product.setName(newName);
     }
 
-    public boolean setPrice(Integer id, Price newPrice) {
-        if (checkIdInList(id)) {
-            productList.get(id).price = newPrice;
-            return true;
-        }
-        return false;
+    public void setPrice(Integer id, Price newPrice) {
+        Product product = productList.get(id);
+        if (product == null) throw new IllegalArgumentException();
+        else product.setPrice(newPrice);
     }
 
     public Price getPrice(Integer id, int cont) {
-        if (checkIdInList(id)) {
-            int sumPenny = productList.get(id).getPrice().getPriceInPenny() * cont;
+        Product product = productList.get(id);
+        if (product == null) {
+            int sumPenny = product.getPrice().getPriceInPenny() * cont;
             Price sumPrice = new Price(sumPenny);
             return sumPrice;
         } else throw new IllegalArgumentException();
@@ -159,15 +152,13 @@ public class PriceList {
     }
 
     public String getName(Integer id) {
-        if (checkIdInList(id)) return productList.get(id).name;
+        Product product = productList.get(id);
+        if (product == null) return product.name;
         else throw new IllegalArgumentException();
     }
 
-    public void removeProduct(Integer id) {
-        if (checkIdInList(id)) {
-            productList.remove(id);
-            idList.remove(id);
-        } else throw new IllegalArgumentException();
+    public boolean removeProduct(Integer id) {
+        return productList.remove(id) != null;
     }
 
     public int getId(String name) {

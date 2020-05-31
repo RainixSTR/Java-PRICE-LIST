@@ -9,8 +9,7 @@ public class Main {
         priceList.addProduct(2,"orange", new PriceList.Price(3, 2));
         PriceList priceList1 = new PriceList();
         System.out.println(priceList);
-        priceList1.addProduct(1,"brick", new PriceList.Price(200));
-        priceList.removeProduct(1);
+        priceList.setName(3,"brick");
         System.out.println(priceList);
     }
 }
