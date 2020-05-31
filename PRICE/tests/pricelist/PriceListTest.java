@@ -16,11 +16,6 @@ public class PriceListTest {
             put(1, new PriceList.Product("apple", new PriceList.Price(4, 2)));
         }});
         assertEquals(priceList, priceList1);
-        priceList.addProduct(3, "banana", new PriceList.Price(3, 34));
-        assertNotEquals(priceList, priceList1);
-        assertThrows(IllegalArgumentException.class, () -> {
-            priceList.addProduct(1, "potato", new PriceList.Price(4, 2));
-        });
     }
 
     @Test
@@ -67,7 +62,15 @@ public class PriceListTest {
         PriceList priceList = new PriceList();
         priceList.addProduct(1, "apple", new PriceList.Price(4, 2));
         priceList.addProduct(2, "orange", new PriceList.Price(3, 2));
-        assertEquals(4.02, priceList.getPrice(1), 0.001);
+        assertEquals(new PriceList.Price(4,2), priceList.getPrice(1));
+    }
+
+    @Test
+    public void getSumPrice() {
+        PriceList priceList = new PriceList();
+        priceList.addProduct(1, "apple", new PriceList.Price(4, 2));
+        priceList.addProduct(2, "orange", new PriceList.Price(3, 2));
+        assertEquals(new PriceList.Price(151,0), priceList.getPrice(2,50));
     }
 
     @Test

@@ -10,8 +10,22 @@ public class PriceList {
         private int penny;
 
         public Price(int ruble, int penny) {
-            this.ruble = ruble;
-            this.penny = penny;
+            if (ruble > -1 && penny > -1 && penny < 100) {
+                this.ruble = ruble;
+                this.penny = penny;
+            } else throw new IllegalArgumentException();
+        }
+
+        public Price(int penny) {
+            if (penny > -1) {
+                this.ruble = penny / 100;
+                this.penny = penny % 100;
+            }
+            else throw new IllegalArgumentException();
+        }
+
+        public int getPriceInPenny() {
+            return ruble * 100 + penny;
         }
 
         public int getRuble() {
@@ -22,18 +36,25 @@ public class PriceList {
             return penny;
         }
 
-        public void setRuble(int newRuble) {
-            ruble = newRuble;
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Price price = (Price) o;
+            return ruble == price.ruble &&
+                    penny == price.penny;
         }
 
-        public void setPenny(int newPenny) {
-            penny = newPenny;
+        @Override
+        public int hashCode() {
+            return Objects.hash(ruble, penny);
         }
 
         @Override
         public String toString() {
-
-            return super.toString();
+            return "Price: " + ruble +
+                    " rub., " + penny +
+                    " pen.";
         }
     }
 
@@ -59,16 +80,6 @@ public class PriceList {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Product product = (Product) o;
-            return price.ruble == product.price.ruble &&
-                    price.penny == product.price.penny &&
-                    name.equals(product.name);
-        }
-
-        @Override
         public int hashCode() {
             return Objects.hash(name, price);
         }
@@ -85,6 +96,15 @@ public class PriceList {
             sb.append(" pen.");
             return sb.toString();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Product product = (Product) o;
+            return Objects.equals(name, product.name) &&
+                    Objects.equals(price, product.price);
+        }
     }
 
     private Map<Integer, Product> productList = new HashMap<>();
@@ -96,56 +116,54 @@ public class PriceList {
     public PriceList() {
     }
 
-    private boolean checkId(Integer id) {
-        return productList.keySet().contains(id);
+    public boolean addProduct(Integer id, Product newProduct) {
+        return productList.putIfAbsent(id, newProduct) == null;
     }
 
-    public void addProduct(Integer id, Product newProduct) {
-        if (!checkId(id)) productList.put(id, newProduct);
-        else throw new IllegalArgumentException();
+    public boolean addProduct(Integer id, String name, Price price) {
+        return addProduct(id, new Product(name, price));
     }
 
-    public void addProduct(Integer id, String name, Price price) {
-        if (price.ruble > -1 && price.penny > -1 && price.penny < 100)
-            addProduct(id, new Product(name, price));
-        else throw new IllegalArgumentException();
+    public boolean setName(Integer id, String newName) {
+        if (productList.get(id) != null)  {
+            productList.get(id).name = newName;
+            return true;
+        }
+        return false;
     }
 
-    public void setName(Integer id, String newName) {
-        if (checkId(id)) productList.get(id).name = newName;
-        else throw new IllegalArgumentException();
+    public boolean setPrice(Integer id, Price newPrice) {
+        if (productList.get(id) != null)  {
+            productList.get(id).price = newPrice;
+            return true;
+        }
+        return false;
     }
 
-    public void setPrice(Integer id, Price newPrice) {
-        if (checkId(id)) productList.get(id).price = newPrice;
-        else throw new IllegalArgumentException();
-    }
-
-    public double getPrice(Integer id, int cont) {
-        if (checkId(id)) {
+    public Price getPrice(Integer id, int cont) {
+        if (productList.get(id) != null) {
             int findRuble = productList.get(id).getPrice().ruble * cont;
             int findPenny = productList.get(id).getPrice().penny * cont;
-            if (findPenny > 100) {
-                findRuble = findPenny / 100;
+            if (findPenny > 99) {
+                findRuble += findPenny / 100;
                 findPenny = findPenny % 100;
             }
-            double findSum = findRuble + findPenny * 0.01;
-            return findSum;
-        }
-        else throw new IllegalArgumentException();
+            Price sumPrice = new Price(findRuble, findPenny);
+            return sumPrice;
+        } else throw new IllegalArgumentException();
     }
 
-    public double getPrice(Integer id) {
+    public Price getPrice(Integer id) {
         return getPrice(id, 1);
     }
 
     public String getName(Integer id) {
-        if (checkId(id)) return productList.get(id).name;
+        if (productList.get(id) != null) return productList.get(id).name;
         else throw new IllegalArgumentException();
     }
 
     public Product removeProduct(Integer id) {
-        if (checkId(id)) {
+        if (productList.get(id) != null) {
             Product deletedProduct = productList.remove(id);
             return deletedProduct;
         } else throw new IllegalArgumentException();
