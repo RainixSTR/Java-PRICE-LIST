@@ -140,7 +140,7 @@ public class PriceList {
 
     public Price getPrice(Integer id, int cont) {
         Product product = productList.get(id);
-        if (product == null) {
+        if (product != null) {
             int sumPenny = product.getPrice().getPriceInPenny() * cont;
             Price sumPrice = new Price(sumPenny);
             return sumPrice;
@@ -153,7 +153,7 @@ public class PriceList {
 
     public String getName(Integer id) {
         Product product = productList.get(id);
-        if (product == null) return product.name;
+        if (product != null) return product.name;
         else throw new IllegalArgumentException();
     }
 

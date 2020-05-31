@@ -16,6 +16,9 @@ public class PriceListTest {
             put(1, new PriceList.Product("apple", new PriceList.Price(4, 2)));
         }});
         assertEquals(priceList, priceList1);
+        assertThrows(IllegalArgumentException.class, () -> {
+            priceList.addProduct(1, "potato", new PriceList.Price(4, 2));
+        });
     }
 
     @Test
