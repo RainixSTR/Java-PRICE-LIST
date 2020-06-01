@@ -118,8 +118,8 @@ public class PriceList {
     }
 
     public void addProduct(Integer id, Product newProduct) {
-        if (productList.putIfAbsent(id, newProduct) == null) ;
-        else throw new IllegalArgumentException();
+        if (productList.putIfAbsent(id, newProduct) != null)
+            throw new IllegalArgumentException();
     }
 
     public void addProduct(Integer id, String name, Price price) {
