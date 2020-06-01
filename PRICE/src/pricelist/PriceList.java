@@ -142,8 +142,7 @@ public class PriceList {
         Product product = productList.get(id);
         if (product != null) {
             int sumPenny = product.getPrice().getPriceInPenny() * cont;
-            Price sumPrice = new Price(sumPenny);
-            return sumPrice;
+            return new Price(sumPenny);
         } else throw new IllegalArgumentException();
     }
 
